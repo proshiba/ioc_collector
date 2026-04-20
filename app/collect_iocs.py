@@ -24,7 +24,7 @@ _APP_DIR = os.path.dirname(os.path.abspath(__file__))
 if _APP_DIR not in sys.path:
     sys.path.insert(0, _APP_DIR)
 
-from module.threatfox import fetch_daily_iocs as _fetch_threatfox  # noqa: E402
+from module.fetch.threatfox import fetch_daily_iocs as _fetch_threatfox  # noqa: E402
 
 OUTPUT_DIR = "iocs"
 

@@ -1,10 +1,10 @@
-"""Tests for app/module/threatfox.py"""
+"""Tests for app/module/fetch/threatfox.py"""
 
 import pytest
 import requests
 from unittest.mock import MagicMock, patch
 
-from module.threatfox import THREATFOX_API_URL, fetch_daily_iocs
+from module.fetch.threatfox import THREATFOX_API_URL, fetch_daily_iocs
 
 
 FAKE_RESPONSE = {
