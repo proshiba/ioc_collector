@@ -1,4 +1,4 @@
-"""Tests for app/module/enrich_domain.py"""
+"""Tests for app/module/enrich/enrich_domain.py"""
 
 from datetime import datetime
 from unittest.mock import MagicMock, patch
@@ -7,7 +7,7 @@ import dns.exception
 import dns.resolver
 import pytest
 
-from module.enrich_domain import _normalise, enrich_domain, fetch_whois, resolve_dns
+from module.enrich.enrich_domain import _normalise, enrich_domain, fetch_whois, resolve_dns
 
 
 # ---------------------------------------------------------------------------
@@ -176,9 +176,9 @@ class TestFetchWhois:
 class TestEnrichDomain:
     def test_returns_expected_structure(self):
         with (
-            patch("module.enrich_domain.resolve_dns", return_value=["93.184.216.34"]) as mock_dns,
+            patch("module.enrich.enrich_domain.resolve_dns", return_value=["93.184.216.34"]) as mock_dns,
             patch(
-                "module.enrich_domain.fetch_whois",
+                "module.enrich.enrich_domain.fetch_whois",
                 return_value={
                     "registrant_name": "ACME",
                     "registrant_email": "admin@example.com",
@@ -198,8 +198,8 @@ class TestEnrichDomain:
 
     def test_dns_failure_yields_empty_dns_list(self):
         with (
-            patch("module.enrich_domain.resolve_dns", return_value=[]),
-            patch("module.enrich_domain.fetch_whois", return_value={
+            patch("module.enrich.enrich_domain.resolve_dns", return_value=[]),
+            patch("module.enrich.enrich_domain.fetch_whois", return_value={
                 "registrant_name": None,
                 "registrant_email": None,
                 "registrar": None,
