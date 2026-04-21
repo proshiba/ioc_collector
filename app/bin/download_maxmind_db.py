@@ -6,7 +6,7 @@ Downloads the MaxMind GeoLite2-ASN and GeoLite2-Country databases and saves
 the .mmdb files to the specified output directory.
 
 Usage:
-    python app/download_maxmind_db.py [--dest-dir data/maxmind]
+    python app/bin/download_maxmind_db.py [--dest-dir data/maxmind]
 
 The MaxMind license key must be set via the ``MAXMIND_LICENSE_KEY`` environment
 variable.  A free license key can be obtained by registering at
@@ -19,7 +19,7 @@ import sys
 from typing import Optional, List
 
 # Make `module.*` importable regardless of how this script is invoked.
-_APP_DIR = os.path.dirname(os.path.abspath(__file__))
+_APP_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _APP_DIR not in sys.path:
     sys.path.insert(0, _APP_DIR)
 
@@ -45,7 +45,7 @@ def main(argv: Optional[List[str]] = None) -> None:
         )
         sys.exit(1)
 
-    print(f"Downloading MaxMind GeoLite2 databases to '{args.dest_dir}' …")
+    print(f"Downloading MaxMind GeoLite2 databases to '{args.dest_dir}' ...")
     try:
         paths = download_maxmind_dbs(dest_dir=args.dest_dir, license_key=license_key)
     except Exception as exc:

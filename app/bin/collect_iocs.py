@@ -6,7 +6,7 @@ Collects IOCs from the specified source and saves them to
 iocs/<yyyymmdd>.json (one file per run date).
 
 Usage:
-    python app/collect_iocs.py [--source {threatfox}]
+    python app/bin/collect_iocs.py [--source {threatfox}]
 
 The `iocs/` output directory is created automatically if it does not exist.
 """
@@ -18,9 +18,8 @@ import sys
 from datetime import datetime, timezone
 from typing import Callable, Dict, List, Optional
 
-# Make `module.*` importable regardless of how this script is invoked
-# (e.g. `python app/collect_iocs.py` or `python -m app.collect_iocs`).
-_APP_DIR = os.path.dirname(os.path.abspath(__file__))
+# Make `module.*` importable regardless of how this script is invoked.
+_APP_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _APP_DIR not in sys.path:
     sys.path.insert(0, _APP_DIR)
 
