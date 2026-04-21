@@ -3,6 +3,7 @@
 Fetches daily IOCs from the ThreatFox API (https://threatfox.abuse.ch).
 """
 
+import os
 import sys
 
 import requests
@@ -12,6 +13,7 @@ THREATFOX_API_URL = "https://threatfox-api.abuse.ch/api/v1/"
 
 def fetch_daily_iocs() -> dict:
     """Call the ThreatFox API and return the JSON response for the last day."""
+    api_key = os.environ.get("THREATFOX_API_KEY", "")
     payload = {
         "query": "get_iocs",
         "days": 1,
@@ -19,7 +21,7 @@ def fetch_daily_iocs() -> dict:
     try:
         response = requests.post(
             THREATFOX_API_URL,
-            headers={"Content-Type": "application/json"},
+            headers={"Content-Type": "application/json", "Auth-Key": api_key},
             json=payload,
             timeout=60,
         )
