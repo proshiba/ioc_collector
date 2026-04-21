@@ -1,6 +1,9 @@
 # Collected IOC output files (generated at runtime)
 iocs/
 
+# Downloaded MaxMind GeoLite2 databases (generated at runtime)
+data/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
