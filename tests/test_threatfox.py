@@ -43,12 +43,32 @@ class TestFetchDailyIocs:
         with patch("requests.post", return_value=_make_mock_response(FAKE_RESPONSE)) as mock_post:
             fetch_daily_iocs()
 
-        mock_post.assert_called_once_with(
-            THREATFOX_API_URL,
-            headers={"Content-Type": "application/json"},
-            json={"query": "get_iocs", "days": 1},
-            timeout=60,
-        )
+        call_kwargs = mock_post.call_args
+        assert call_kwargs[0][0] == THREATFOX_API_URL
+        assert call_kwargs[1]["json"] == {"query": "get_iocs", "days": 1}
+        assert call_kwargs[1]["timeout"] == 60
+        assert call_kwargs[1]["headers"]["Content-Type"] == "application/json"
+
+    def test_sends_auth_key_header(self):
+        with (
+            patch("requests.post", return_value=_make_mock_response(FAKE_RESPONSE)) as mock_post,
+            patch.dict("os.environ", {"THREATFOX_API_KEY": "test-api-key"}),
+        ):
+            fetch_daily_iocs()
+
+        headers = mock_post.call_args[1]["headers"]
+        assert headers.get("Auth-Key") == "test-api-key"
+
+    def test_sends_empty_auth_key_when_env_not_set(self):
+        with (
+            patch("requests.post", return_value=_make_mock_response(FAKE_RESPONSE)) as mock_post,
+            patch.dict("os.environ", {}, clear=True),
+        ):
+            fetch_daily_iocs()
+
+        headers = mock_post.call_args[1]["headers"]
+        assert "Auth-Key" in headers
+        assert headers["Auth-Key"] == ""
 
     def test_http_error_is_propagated(self):
         mock_resp = MagicMock()
