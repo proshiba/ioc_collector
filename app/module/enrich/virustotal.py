@@ -8,7 +8,7 @@ API v3.  For each indicator type the following data is collected:
 * **Relations** – files communicating with the indicator, resolved hosts /
   IPs, files downloaded from the indicator (IP/domain), or network
   infrastructure contacted by the file (hash).
-* **Behavior** – key items from sandbox behaviour reports (processes created,
+* **Behavior** – key items from sandbox behavior reports (processes created,
   network connections, DNS lookups, dropped files) for file hashes.
 
 The VirusTotal API key is read from the ``VIRUSTOTAL_API_KEY`` environment
@@ -307,6 +307,8 @@ def _extract_behavior_summary(behaviors: List[Dict[str, Any]]) -> Dict[str, Any]
         )
 
         for conn in attrs.get("network_tcp", []) + attrs.get("network_udp", []):
+            # VT sandboxes use "destination_ip"/"destination_port" in most reports,
+            # but some older sandbox formats use the shorter "ip"/"port" keys.
             dest = conn.get("destination_ip") or conn.get("ip")
             port = conn.get("destination_port") or conn.get("port")
             if dest:
