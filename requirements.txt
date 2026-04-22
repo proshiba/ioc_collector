@@ -3,3 +3,4 @@ dnspython>=2.4.0
 python-whois>=0.9.0
 geoip2>=4.8.0
 tldextract>=5.0.0
+cryptography>=46.0.5
