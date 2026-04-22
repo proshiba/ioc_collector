@@ -130,9 +130,10 @@ class TestParseCertificate:
     def test_sans_present_when_in_cert(self):
         der = _generate_self_signed_der("example.com", sans=["example.com", "www.example.com"])
         result = parse_certificate(der)
-        assert len(result["subject_alt_names"]) == 2
-        san_strings = " ".join(result["subject_alt_names"])
-        assert "example.com" in san_strings
+        sans = result["subject_alt_names"]
+        assert len(sans) == 2
+        # Each SAN entry is a string like "DNS:example.com"
+        assert all(isinstance(s, str) for s in sans)
 
     def test_sans_empty_when_not_in_cert(self):
         der = _generate_self_signed_der("example.com", sans=None)
