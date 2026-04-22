@@ -25,6 +25,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 _TIMEOUT = 3
 _PREVIEW_SIZE = 1024
+_USER_AGENT = "ioc-collector/1.0"
 
 
 class _TitleParser(HTMLParser):
@@ -102,7 +103,7 @@ def _check_protocol(
             verify=False,
             allow_redirects=True,
             stream=True,
-            headers={"User-Agent": "ioc-collector/1.0"},
+            headers={"User-Agent": _USER_AGENT},
         ) as resp:
             result["accessible"] = True
             result["status_code"] = resp.status_code
@@ -115,10 +116,8 @@ def _check_protocol(
                 except ValueError:
                     pass
 
-            chunk = b""
-            for data in resp.iter_content(chunk_size=_PREVIEW_SIZE):
-                chunk = data[:_PREVIEW_SIZE]
-                break
+            chunk = next(resp.iter_content(chunk_size=_PREVIEW_SIZE), b"")
+            chunk = chunk[:_PREVIEW_SIZE]
 
             if chunk:
                 preview = chunk.decode("utf-8", errors="replace")
