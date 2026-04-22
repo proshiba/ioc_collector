@@ -88,6 +88,7 @@ def fetch_certificate_der(
     context = ssl.create_default_context()
     context.check_hostname = False
     context.verify_mode = ssl.CERT_NONE
+    context.minimum_version = ssl.TLSVersion.TLSv1_2
     try:
         with socket.create_connection((target, port), timeout=timeout) as sock:
             with context.wrap_socket(sock, server_hostname=target) as ssock:
