@@ -51,12 +51,16 @@ def parse_certificate(der_bytes: bytes) -> Optional[Dict[str, Any]]:
 
         fingerprint = cert.fingerprint(hashes.SHA256()).hex()
 
+        # not_valid_before_utc was added in cryptography 42; fall back for older installs
+        not_before = getattr(cert, "not_valid_before_utc", None) or cert.not_valid_before
+        not_after = getattr(cert, "not_valid_after_utc", None) or cert.not_valid_after
+
         return {
             "subject": _name_to_dict(cert.subject),
             "issuer": _name_to_dict(cert.issuer),
             "serial_number": str(cert.serial_number),
-            "not_valid_before": cert.not_valid_before_utc.isoformat(),
-            "not_valid_after": cert.not_valid_after_utc.isoformat(),
+            "not_valid_before": not_before.isoformat(),
+            "not_valid_after": not_after.isoformat(),
             "subject_alt_names": sans,
             "fingerprint_sha256": fingerprint,
         }
