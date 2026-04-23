@@ -6,7 +6,7 @@ Collects IOCs from the specified source and saves them to
 iocs/<yyyymmdd>.json (one file per run date).
 
 Usage:
-    python app/bin/collect_iocs.py [--source {threatfox}]
+    python app/bin/collect_iocs.py [--source {threatfox,phishtank}]
 
 The `iocs/` output directory is created automatically if it does not exist.
 """
@@ -24,12 +24,14 @@ if _APP_DIR not in sys.path:
     sys.path.insert(0, _APP_DIR)
 
 from module.fetch.threatfox import fetch_daily_iocs as _fetch_threatfox  # noqa: E402
+from module.fetch.phishtank import fetch_iocs as _fetch_phishtank  # noqa: E402
 
 OUTPUT_DIR = "iocs"
 
 # Registry of available sources.  Add new sources here.
 SOURCES: Dict[str, Callable[[], dict]] = {
     "threatfox": _fetch_threatfox,
+    "phishtank": _fetch_phishtank,
 }
 
 
