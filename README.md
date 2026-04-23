@@ -8,9 +8,10 @@
 
 1. [セットアップ](#セットアップ)
 2. [IOC の収集](#ioc-の収集)
-3. [MaxMind IP データベースのダウンロード](#maxmind-ip-データベースのダウンロード)
-4. [IP アドレスのエンリッチ](#ip-アドレスのエンリッチ)
-5. [ディレクトリ構成](#ディレクトリ構成)
+3. [IOC のエンリッチ](#ioc-のエンリッチ)
+4. [MaxMind IP データベースのダウンロード](#maxmind-ip-データベースのダウンロード)
+5. [IP アドレスのエンリッチ](#ip-アドレスのエンリッチ)
+6. [ディレクトリ構成](#ディレクトリ構成)
 
 ---
 
@@ -27,12 +28,20 @@ pip install -r requirements.txt
 ThreatFox から直近 1 日分の IOC を取得し、`iocs/<yyyymmdd>.json` に保存します。
 
 ```bash
-python app/bin/collect_iocs.py [--source {threatfox}]
+python app/bin/collect_iocs.py [--source {threatfox,phishtank,malware_bazaar}]
 ```
 
 | オプション | 説明 | デフォルト |
 |---|---|---|
 | `--source` | 収集元ソース | `threatfox` |
+
+### 対応ソース
+
+| ソース | 説明 | 環境変数 |
+|---|---|---|
+| `threatfox` | [ThreatFox](https://threatfox.abuse.ch) から直近 1 日分の IOC を取得 | `THREATFOX_API_KEY`（任意） |
+| `phishtank` | [PhishTank](https://www.phishtank.com) のオンラインフィッシング URL フィードを取得 | `PHISHTANK_API_KEY`（任意） |
+| `malware_bazaar` | [MalwareBazaar](https://bazaar.abuse.ch) から最新 100 件のマルウェアサンプルを取得 | `MALWARE_BAZAAR_API_KEY`（任意） |
 
 **出力例:**
 
@@ -40,6 +49,64 @@ python app/bin/collect_iocs.py [--source {threatfox}]
 Fetching IOCs from threatfox for the last day …
 Retrieved 120 IOC(s).
 Saved to iocs/20240101.json
+```
+
+---
+
+## IOC のエンリッチ
+
+`iocs/` ディレクトリに保存された IOC ファイルを読み込み、含まれる IP アドレスおよびドメイン名を一斉にエンリッチします。
+エンリッチ結果は `enriched_ioc/` フォルダに保存され、処理が完了した元の IOC ファイルは自動的に削除されます。
+
+```bash
+python app/bin/enrich_iocs.py [--type {ip,domain,all}]
+                               [--ioc-dir IOCS_DIR]
+                               [--output-dir ENRICHED_DIR]
+```
+
+| オプション | 説明 | デフォルト |
+|---|---|---|
+| `--type` | エンリッチ対象のタイプ（`ip`・`domain`・`all`） | `all` |
+| `--ioc-dir` | 収集済み IOC JSON ファイルのディレクトリ | `iocs` |
+| `--output-dir` | エンリッチ結果の保存先ディレクトリ | `enriched_ioc` |
+
+> **注意:** IP のエンリッチには MaxMind データベースが必要です。事前に `download_maxmind_db.py` を実行してください。
+
+**出力例:**
+
+```
+Found 2 IOC file(s) to process.
+Processing iocs/20240101.json …
+  Enriching IP: 198.51.100.42
+  Enriching domain: evil.example.com
+  Saved enriched data to enriched_ioc/20240101.json
+  Deleted original file iocs/20240101.json
+Done.
+```
+
+**エンリッチ結果ファイルの構造:**
+
+```json
+{
+  "source_file": "iocs/20240101.json",
+  "enriched_at": "2024-01-15T10:00:00+00:00",
+  "ips": [
+    {
+      "ip": "198.51.100.42",
+      "asn": 64496,
+      "org": "TEST-ORG",
+      "country_code": "US",
+      "country_name": "United States"
+    }
+  ],
+  "domains": [
+    {
+      "domain": "evil.example.com",
+      "dns": ["198.51.100.1"],
+      "whois": { ... }
+    }
+  ]
+}
 ```
 
 ---
@@ -144,10 +211,13 @@ ioc_collector/
 ├── app/
 │   ├── bin/                         # CLIスクリプト
 │   │   ├── collect_iocs.py          # IOC収集スクリプト
+│   │   ├── enrich_iocs.py           # IOCエンリッチスクリプト
 │   │   └── download_maxmind_db.py   # MaxMind DBダウンロードスクリプト
 │   └── module/
 │       ├── fetch/
 │       │   ├── threatfox.py         # ThreatFox API クライアント
+│       │   ├── phishtank.py         # PhishTank フィードクライアント
+│       │   ├── malware_bazaar.py    # MalwareBazaar API クライアント
 │       │   └── maxmind_db.py        # MaxMind DBダウンロード関数
 │       └── enrich/
 │           ├── enrich_domain.py     # ドメインエンリッチ（DNS・WHOIS）
@@ -155,6 +225,7 @@ ioc_collector/
 ├── data/
 │   └── maxmind/                     # ダウンロードされた .mmdb ファイル（自動生成）
 ├── iocs/                            # 収集したIOCのJSONファイル（自動生成）
+├── enriched_ioc/                    # エンリッチ済みIOCのJSONファイル（自動生成）
 ├── tests/                           # テストコード
 └── requirements.txt
 ```
